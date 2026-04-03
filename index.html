@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora Del Taller</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+font-family:'Orbitron',sans-serif;
+background:#0f172a;
+color:#e5e7eb;
+padding:30px;
+text-align:center;
+}
+
+h1{
+font-size:42px;
+color:#22d3ee;
+margin-bottom:20px;
+}
+
+/* BUSCADOR */
+
+#busqueda-container{
+display:flex;
+justify-content:center;
+gap:10px;
+margin-bottom:20px;
+}
+
+#busqueda{
+padding:10px 14px;
+border-radius:12px;
+border:none;
+background:#111827;
+color:white;
+}
+
+#btnBuscar{
+padding:10px 16px;
+border-radius:12px;
+border:none;
+background:#22d3ee;
+cursor:pointer;
+transition:.2s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+/* FILTROS */
+
+#filtros{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+margin-bottom:20px;
+}
+
+#filtros button{
+padding:8px 14px;
+border-radius:12px;
+border:none;
+background:#1f2937;
+color:#22d3ee;
+cursor:pointer;
+}
+
+#filtros .activo{
+background:#22d3ee;
+color:#0f172a;
+}
+
+/* PANEL FACTURA */
+
+.factura-panel{
+background:#111827;
+border-radius:16px;
+padding:20px;
+max-width:900px;
+margin:auto;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.factura-header{
+display:grid;
+grid-template-columns:2fr .6fr 1fr;
+font-weight:bold;
+border-bottom:2px solid #22d3ee55;
+padding-bottom:8px;
+margin-bottom:8px;
+font-family:'Roboto Mono';
+}
+
+.factura-item{
+display:grid;
+grid-template-columns:2fr .6fr 1fr;
+align-items:center;
+font-family:'Roboto Mono';
+font-size:14px;
+padding:6px 0;
+border-bottom:1px solid #1f2937;
+}
+
+/* PRODUCT GRID */
+
+#lista{
+margin-top:10px;
+}
+
+.grid-productos{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+gap:16px;
+}
+
+/* PRODUCT CARD */
+
+.product-card{
+background:#1f2937;
+border-radius:16px;
+padding:16px;
+transition:.25s;
+box-shadow:0 0 0 transparent;
+}
+
+.product-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 20px rgba(0,0,0,.5);
+border:1px solid #22d3ee;
+}
+
+.product-info h4{
+color:#22d3ee;
+}
+
+.category-tag{
+display:inline-block;
+padding:4px 10px;
+border-radius:12px;
+font-size:11px;
+background:#22d3ee;
+color:#0f172a;
+margin-top:6px;
+}
+
+.quantity-controls{
+display:flex;
+justify-content:center;
+gap:6px;
+margin-top:8px;
+}
+
+.quantity-controls button{
+width:28px;
+height:28px;
+border-radius:50%;
+border:none;
+background:#22d3ee;
+cursor:pointer;
+}
+
+.edit-price-btn{
+background:#facc15;
+border:none;
+padding:6px 10px;
+border-radius:10px;
+margin-top:4px;
+}
+
+.delete-btn{
+background:#ef4444;
+color:white;
+border:none;
+padding:6px 10px;
+border-radius:10px;
+margin-top:4px;
+}
+
+.total{
+margin-top:25px;
+padding:14px 20px;
+border-radius:14px;
+display:inline-block;
+font-family:'Roboto Mono';
+font-size:24px;
+background:#020617;
+}
+
+/* MODAL */
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.6);
+justify-content:center;
+align-items:center;
+}
+
+.modal.show{
+display:flex;
+}
+
+.modal-content{
+background:#111827;
+border-radius:16px;
+padding:24px;
+width:360px;
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.modal-content input,.modal-content select{
+padding:12px;
+border-radius:12px;
+border:none;
+background:#020617;
+color:white;
+}
+
+.modal-content button{
+padding:12px;
+border-radius:12px;
+border:none;
+background:#22d3ee;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Facturas</h1>
+
+<div id="busqueda-container">
+<input type="text" id="busqueda" placeholder="Buscar producto...">
+<button id="btnBuscar">Buscar</button>
+</div>
+
+<div id="filtros"></div>
+
+<div class="factura-panel">
+
+<div class="factura-header">
+<div>Producto</div>
+<div style="text-align:center">Cant</div>
+<div style="text-align:right">Precio</div>
+</div>
+
+<div id="lista"></div>
+
+</div>
+
+<div class="total" id="total">Total: $0</div>
+
+<br><br>
+
+<button id="btnAbrirModal">Agregar Producto</button> <button onclick="reiniciar()">Reiniciar Cantidades</button>
+
+<div id="modalProducto" class="modal">
+
+<div class="modal-content">
+
+<h3>Agregar Producto</h3>
+
+<input id="nombre" placeholder="Nombre del producto">
+<input id="precio" type="number" placeholder="Precio">
+
+<select id="categoria">
+
+<option value="">Seleccionar categoría</option>
+<option value="mantenimiento">Mantenimiento</option>
+<option value="cosmeticos">Cosméticos</option>
+<option value="rendimiento">Rendimiento</option>
+<option value="ilegales">Ilegales</option>
+<option value="reparaciones">Reparaciones</option>
+
+</select>
+
+<button onclick="agregarProducto()">Agregar</button> <button onclick="cerrarModal()">Cerrar</button>
+
+</div>
+</div>
+
+<audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9d3e55.mp3"></audio>
+
+<script>
+
+let productos=[]
+let filtroCategoria="todos"
+
+const categoriasTodas=["mantenimiento","cosmeticos","rendimiento","ilegales","reparaciones"]
+
+const modal=document.getElementById('modalProducto')
+const inputBusqueda=document.getElementById('busqueda')
+const clickSound=document.getElementById("clickSound")
+
+function sonido(){
+clickSound.currentTime=0
+clickSound.play()
+}
+
+window.onload=()=>{
+
+let guardados=localStorage.getItem("productos")
+
+if(guardados){
+productos=JSON.parse(guardados)
+}
+
+actualizarFiltros()
+actualizarTabla()
+
+}
+
+document.getElementById("btnBuscar").onclick=actualizarTabla
+
+inputBusqueda.addEventListener("keypress",function(e){
+if(e.key==="Enter") actualizarTabla()
+})
+
+function actualizarFiltros(){
+
+const filtrosDiv=document.getElementById("filtros")
+filtrosDiv.innerHTML=""
+
+const btnTodos=document.createElement("button")
+
+btnTodos.className="activo"
+btnTodos.innerText="Precio Final"
+
+btnTodos.onclick=()=>{
+filtroCategoria="todos"
+actualizarTabla()
+resaltarFiltro(btnTodos)
+}
+
+filtrosDiv.appendChild(btnTodos)
+
+categoriasTodas.forEach(c=>{
+
+const btn=document.createElement("button")
+
+btn.innerText=c.charAt(0).toUpperCase()+c.slice(1)
+
+btn.onclick=()=>{
+filtroCategoria=c
+actualizarTabla()
+resaltarFiltro(btn)
+}
+
+filtrosDiv.appendChild(btn)
+
+})
+
+}
+
+function resaltarFiltro(btnActivo){
+
+document.querySelectorAll("#filtros button")
+.forEach(b=>b.classList.remove("activo"))
+
+btnActivo.classList.add("activo")
+
+}
+
+function actualizarTabla(){
+
+const lista=document.getElementById("lista")
+lista.innerHTML=""
+
+const textoBusqueda=inputBusqueda.value.toLowerCase()
+
+if(filtroCategoria==="todos"){
+lista.className=""
+}else{
+lista.className="grid-productos"
+}
+
+productos.forEach((p,index)=>{
+
+if(filtroCategoria!=="todos" && p.categoria!==filtroCategoria) return
+
+if(textoBusqueda && !p.nombre.toLowerCase().includes(textoBusqueda)) return
+
+if(filtroCategoria==="todos" && p.cantidad===0) return
+
+let card=document.createElement("div")
+
+if(filtroCategoria==="todos"){
+
+card.className="factura-item"
+
+card.innerHTML=`
+<div>${p.nombre}</div>
+<div style="text-align:center">${p.cantidad}</div>
+<div style="text-align:right">$${p.precio}</div>
+`
+
+}else{
+
+card.className="product-card"
+
+card.innerHTML=`
+
+<div class='product-info'>
+<h4>${p.nombre}</h4>
+<p>Precio: $${p.precio}</p>
+<span class='category-tag'>${p.categoria}</span>
+</div>
+
+<div class='quantity-controls'>
+<button onclick='sonido();cambiarCantidad(${index},-1)'>-</button>
+<span>${p.cantidad}</span>
+<button onclick='sonido();cambiarCantidad(${index},1)'>+</button>
+</div>
+
+<button class='edit-price-btn' onclick='editarPrecio(${index})'>Editar</button>
+<button class='delete-btn' onclick='eliminarProducto(${index})'>Eliminar</button>
+
+`
+
+}
+
+lista.appendChild(card)
+
+})
+
+calcularTotal()
+
+}
+
+function calcularTotal(){
+
+let total=productos.reduce((acc,p)=>acc+(p.precio*p.cantidad),0)
+
+document.getElementById("total").innerText="Total: $"+total
+
+}
+
+function cambiarCantidad(i,c){
+
+productos[i].cantidad+=c
+
+if(productos[i].cantidad<0)
+productos[i].cantidad=0
+
+guardar()
+actualizarTabla()
+
+}
+
+function reiniciar(){
+
+productos.forEach(p=>p.cantidad=0)
+
+guardar()
+actualizarTabla()
+
+}
+
+function agregarProducto(){
+
+const nombre=document.getElementById('nombre').value
+const precio=parseFloat(document.getElementById('precio').value)
+const categoria=document.getElementById('categoria').value
+
+if(!nombre||isNaN(precio)||!categoria){
+
+alert('Complete todos los campos')
+return
+
+}
+
+productos.push({
+nombre,
+precio,
+cantidad:1,
+categoria
+})
+
+guardar()
+cerrarModal()
+actualizarTabla()
+
+}
+
+function editarPrecio(i){
+
+let nuevo=prompt("Nuevo precio:",productos[i].precio)
+
+if(nuevo!==null){
+
+productos[i].precio=parseFloat(nuevo)
+
+guardar()
+actualizarTabla()
+
+}
+
+}
+
+function eliminarProducto(i){
+
+if(confirm("Eliminar producto?")){
+
+productos.splice(i,1)
+
+guardar()
+actualizarTabla()
+
+}
+
+}
+
+function guardar(){
+localStorage.setItem("productos",JSON.stringify(productos))
+}
+
+function cerrarModal(){
+modal.classList.remove("show")
+}
+
+document.getElementById("btnAbrirModal").onclick=()=>{
+modal.classList.add("show")
+}
+
+</script>
+
+</body>
+</html>
