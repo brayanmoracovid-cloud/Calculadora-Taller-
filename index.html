@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -9,11 +8,7 @@
 
 <style>
 
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
 
 body{
 font-family:'Orbitron',sans-serif;
@@ -23,10 +18,46 @@ padding:30px;
 text-align:center;
 }
 
-h1{
-font-size:42px;
-color:#22d3ee;
-margin-bottom:20px;
+h1{font-size:42px;color:#22d3ee;margin-bottom:20px}
+
+/* LOGIN */
+
+#pantallaLogin{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#020617;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.login-box{
+background:#111827;
+padding:40px;
+border-radius:16px;
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,.7);
+}
+
+.login-box input{
+padding:12px;
+border-radius:10px;
+border:none;
+background:#020617;
+color:white;
+margin-bottom:10px;
+}
+
+.login-box button{
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#22d3ee;
+cursor:pointer;
 }
 
 /* BUSCADOR */
@@ -52,12 +83,9 @@ border-radius:12px;
 border:none;
 background:#22d3ee;
 cursor:pointer;
-transition:.2s;
 }
 
-button:hover{
-transform:scale(1.05);
-}
+button:hover{transform:scale(1.05)}
 
 /* FILTROS */
 
@@ -116,34 +144,23 @@ border-bottom:1px solid #1f2937;
 
 /* PRODUCT GRID */
 
-#lista{
-margin-top:10px;
-}
-
 .grid-productos{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
 gap:16px;
 }
 
-/* PRODUCT CARD */
-
 .product-card{
 background:#1f2937;
 border-radius:16px;
 padding:16px;
 transition:.25s;
-box-shadow:0 0 0 transparent;
 }
 
 .product-card:hover{
 transform:translateY(-6px);
 box-shadow:0 10px 20px rgba(0,0,0,.5);
 border:1px solid #22d3ee;
-}
-
-.product-info h4{
-color:#22d3ee;
 }
 
 .category-tag{
@@ -213,9 +230,7 @@ justify-content:center;
 align-items:center;
 }
 
-.modal.show{
-display:flex;
-}
+.modal.show{display:flex}
 
 .modal-content{
 background:#111827;
@@ -244,10 +259,29 @@ cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
+
+<!-- LOGIN -->
+
+<div id="pantallaLogin">
+
+<div class="login-box">
+
+<h2 style="color:#22d3ee;margin-bottom:15px">Acceso Taller</h2>
+
+<input id="clave" type="password" placeholder="Contraseña">
+
+<br>
+
+<button onclick="verificarClave()">Entrar</button>
+
+<p id="errorLogin" style="color:red;margin-top:10px"></p>
+
+</div>
+
+</div>
 
 <h1>Facturas</h1>
 
@@ -274,7 +308,8 @@ cursor:pointer;
 
 <br><br>
 
-<button id="btnAbrirModal">Agregar Producto</button> <button onclick="reiniciar()">Reiniciar Cantidades</button>
+<button id="btnAbrirModal">Agregar Producto</button>
+<button onclick="reiniciar()">Reiniciar Cantidades</button>
 
 <div id="modalProducto" class="modal">
 
@@ -296,7 +331,8 @@ cursor:pointer;
 
 </select>
 
-<button onclick="agregarProducto()">Agregar</button> <button onclick="cerrarModal()">Cerrar</button>
+<button onclick="agregarProducto()">Agregar</button>
+<button onclick="cerrarModal()">Cerrar</button>
 
 </div>
 </div>
@@ -304,6 +340,32 @@ cursor:pointer;
 <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9d3e55.mp3"></audio>
 
 <script>
+
+const contraseñaSistema="taller123"
+
+function verificarClave(){
+
+const clave=document.getElementById("clave").value.trim()
+
+if(clave===contraseñaSistema){
+
+document.getElementById("pantallaLogin").style.display="none"
+
+}else{
+
+document.getElementById("errorLogin").innerText="Contraseña incorrecta"
+
+}
+
+}
+
+document.getElementById("clave").addEventListener("keypress",function(e){
+
+if(e.key==="Enter"){
+verificarClave()
+}
+
+})
 
 let productos=[]
 let filtroCategoria="todos"
@@ -422,8 +484,8 @@ card.className="product-card"
 
 card.innerHTML=`
 
-<div class='product-info'>
-<h4>${p.nombre}</h4>
+<div>
+<h4 style="color:#22d3ee">${p.nombre}</h4>
 <p>Precio: $${p.precio}</p>
 <span class='category-tag'>${p.categoria}</span>
 </div>
